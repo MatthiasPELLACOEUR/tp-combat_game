@@ -7,6 +7,7 @@ include('config/db.php');
 $manager = new CharactersManager($db);
 
 if(isset($_POST["create"]) && isset($_POST["name"])){
+
     $name = new Character(["nom" => $_POST["name"]]);
 
     if(!$character->valideName()){
@@ -19,9 +20,12 @@ if(isset($_POST["create"]) && isset($_POST["name"])){
         $manager->add($character);
     }
 }
+
 elseif(isset($_POST["use"]) && isset($_POST["name"])){
+
     if($manager->exists($_POST["name"])){
         $character = $manager->get($_POST["name"]);
+        header('Location : fight.php');
     }
     else{
         $message = 'This character doesn\'t exist';

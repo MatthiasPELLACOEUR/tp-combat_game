@@ -1,0 +1,9 @@
+html, body{
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(to right top, #000000, #13030d, #1a091b, #18102a, #01183b);
+}
+
+h3{
+    color: white;
+}

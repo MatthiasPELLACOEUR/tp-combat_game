@@ -24,6 +24,10 @@ class Character
 
   }
 
+  public function valideName()
+  {
+    return !empty($this->_nom);
+  }
   
   public function hydrate(array $characterRow)
   {

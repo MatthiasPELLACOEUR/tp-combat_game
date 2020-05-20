@@ -100,12 +100,6 @@ class CharactersManager
         $reqUpdate->execute();
     }
 
-    public function valideName($name){
-        $reqNameExist = $this->db->prepare('SELECT * FROM personnage WHERE nom = ?');
-        $reqNameExist->execute([$name]);
-        $nameExist = $reqNameExist->rowCount();
-    }
-
     public function setDb(PDO $db)
     {
         $this->db = $db;

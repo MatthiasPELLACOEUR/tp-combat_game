@@ -4,10 +4,29 @@ include('config/autoload.php');
 
 include('config/db.php');
 
-$manage = new CharactersManager($db);
+$manager = new CharactersManager($db);
 
-if(isset($_POST['create']) && isset($_POST['name'])){
-    $name = new Character(['nom' => $_POST['name']]);
+if(isset($_POST["create"]) && isset($_POST["name"])){
+    $name = new Character(["nom" => $_POST["name"]]);
+
+    if(!$character->valideName()){
+        $message = 'This name is invalid.';
+        unset($character);
+    }elseif($manager->exists($character->name())){
+        $message = "The character's name is already taken.";
+        unset($character);
+    }else {
+        $manager->add($character);
+    }
+}
+elseif(isset($_POST["use"]) && isset($_POST["name"])){
+    if($manager->exists($_POST["name"])){
+        $character = $manager->get($_POST["name"]);
+    }
+    else{
+        $message = 'This character doesn\'t exist';
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -28,7 +47,7 @@ if(isset($_POST['create']) && isset($_POST['name'])){
         </div>
         <div class="row">
             <div class="col s12 m6 offset-m3 l5 offset-l3">
-                <form action="fight.php" method="post">
+                <form action="" method="post">
                     <p>
                         <input type="text" name="name" class="white-text" placeholder="Name" maxlength="50">             
                         <input type="submit" class="btn waves-effect waves-light blue darken-3 right" value="Create this character" name="create">

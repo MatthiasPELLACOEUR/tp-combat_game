@@ -1,68 +1,179 @@
 <?php
+// On enregistre notre autoload.
+// function chargerClasse($classname)
+// {
+  require 'classes/CharactersManager.php';
+  require 'classes/Character.php';
 
-include('config/autoload.php');
+// }
 
-include('config/db.php');
+// spl_autoload_register('chargerClasse');
 
-$manager = new CharactersManager($db);
+session_start(); // On appelle session_start() APRÈS avoir enregistré l'autoload.
 
-if(isset($_POST["create"]) && isset($_POST["name"])){
-
-    $name = new Character(["nom" => $_POST["name"]]);
-
-    if(!$character->valideName()){
-        $message = 'This name is invalid.';
-        unset($character);
-    }elseif($manager->exists($character->name())){
-        $message = "The character's name is already taken.";
-        unset($character);
-    }else {
-        $manager->add($character);
-    }
+if (isset($_GET['deconnexion']))
+{
+  session_destroy();
+  header('Location: .');
+  exit();
 }
 
-elseif(isset($_POST["use"]) && isset($_POST["name"])){
+$db = new PDO('mysql:host=localhost;dbname=jeu_de_combat', 'root', '');
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING); // On émet une alerte à chaque fois qu'une requête a échoué.
 
-    if($manager->exists($_POST["name"])){
-        $character = $manager->get($_POST["name"]);
-        header('Location : fight.php');
+$manager = new PersonnagesManager($db);
+
+if (isset($_SESSION['perso'])) // Si la session perso existe, on restaure l'objet.
+{
+  $perso = $_SESSION['perso'];
+}
+
+if (isset($_POST['creer']) && isset($_POST['nom'])) // Si on a voulu créer un personnage.
+{
+  $perso = new Personnage(['nom' => $_POST['nom']]); // On crée un nouveau personnage.
+  
+  if (!$perso->nomValide())
+  {
+    $message = 'Le nom choisi est invalide.';
+    unset($perso);
+  }
+  elseif ($manager->exists($perso->nom()))
+  {
+    $message = 'Le nom du personnage est déjà pris.';
+    unset($perso);
+  }
+  else
+  {
+    $manager->add($perso);
+  }
+}
+
+elseif (isset($_POST['utiliser']) && isset($_POST['nom'])) // Si on a voulu utiliser un personnage.
+{
+  if ($manager->exists($_POST['nom'])) // Si celui-ci existe.
+  {
+    $perso = $manager->get($_POST['nom']);
+  }
+  else
+  {
+    $message = 'Ce personnage n\'existe pas !'; // S'il n'existe pas, on affichera ce message.
+  }
+}
+
+elseif (isset($_GET['frapper'])) // Si on a cliqué sur un personnage pour le frapper.
+{
+  if (!isset($perso))
+  {
+    $message = 'Merci de créer un personnage ou de vous identifier.';
+  }
+  
+  else
+  {
+    if (!$manager->exists((int) $_GET['frapper']))
+    {
+      $message = 'Le personnage que vous voulez frapper n\'existe pas !';
     }
-    else{
-        $message = 'This character doesn\'t exist';
+    
+    else
+    {
+      $persoAFrapper = $manager->get((int) $_GET['frapper']);
+      
+      $retour = $perso->frapper($persoAFrapper); // On stocke dans $retour les éventuelles erreurs ou messages que renvoie la méthode frapper.
+      
+      switch ($retour)
+      {
+        case Personnage::CEST_MOI :
+          $message = 'Mais... pourquoi voulez-vous vous frapper ???';
+          break;
+        
+        case Personnage::PERSONNAGE_FRAPPE :
+          $message = 'Le personnage a bien été frappé !';
+          
+          $manager->update($perso);
+          $manager->update($persoAFrapper);
+          
+          break;
+        
+        case Personnage::PERSONNAGE_TUE :
+          $message = 'Vous avez tué ce personnage !';
+          
+          $manager->update($perso);
+          $manager->delete($persoAFrapper);
+          
+          break;
+      }
     }
+  }
 }
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <link rel="stylesheet" href="style.css">
+<html>
+  <head>
     <title>TP : Mini jeu de combat</title>
-</head>
-<body>
-    <div class="container">
-        <div class="row">
-            <div class="col l5 offset-l4">
-                <h3>Fight mini game</h3>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col s12 m6 offset-m3 l5 offset-l3">
-                <form action="" method="post">
-                    <p>
-                        <input type="text" name="name" class="white-text" placeholder="Name" maxlength="50">             
-                        <input type="submit" class="btn waves-effect waves-light blue darken-3 right" value="Create this character" name="create">
-                        <input type="submit" class="btn waves-effect waves-light amber darken-4 right" value="Use this character" name="use">
-                    </p>
-                </form>
-            </div>
-        </div>
-    </div>
+    
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>Nombre de personnages créés : <?= $manager->count() ?></p>
+<?php
+if (isset($message)) // On a un message à afficher ?
+{
+  echo '<p>', $message, '</p>'; // Si oui, on l'affiche.
+}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+if (isset($perso)) // Si on utilise un personnage (nouveau ou pas).
+{
+?>
+    <p><a href="?deconnexion=1">Déconnexion</a></p>
+    
+    <fieldset>
+      <legend>Mes informations</legend>
+      <p>
+        Nom : <?= htmlspecialchars($perso->nom()) ?><br />
+        Dégâts : <?= $perso->degats() ?>
+      </p>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Qui frapper ?</legend>
+      <p>
+<?php
+$persos = $manager->getList($perso->nom());
 
-</body>
+if (empty($persos))
+{
+  echo 'Personne à frapper !';
+}
+
+else
+{
+  foreach ($persos as $unPerso)
+  {
+    echo '<a href="?frapper=', $unPerso->id(), '">', htmlspecialchars($unPerso->nom()), '</a> (dégâts : ', $unPerso->degats(), ')<br />';
+  }
+}
+?>
+      </p>
+    </fieldset>
+<?php
+}
+else
+{
+?>
+    <form action="" method="post">
+      <p>
+        Nom : <input type="text" name="nom" maxlength="50" />
+        <input type="submit" value="Créer ce personnage" name="creer" />
+        <input type="submit" value="Utiliser ce personnage" name="utiliser" />
+      </p>
+    </form>
+<?php
+}
+?>
+  </body>
 </html>
+<?php
+if (isset($perso)) // Si on a créé un personnage, on le stocke dans une variable session afin d'économiser une requête SQL.
+{
+  $_SESSION['perso'] = $perso;
+}

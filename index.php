@@ -56,7 +56,8 @@ require 'combat.php';
         Nom : <?= htmlspecialchars($perso->nom()) ?><br />
         Dégâts : <?= $perso->degats() ?><br />
         Niveau : <?= $perso->niveau() ?><br />
-        Experience <?= $perso->experience() ?>
+        Experience :<?= $perso->experience() ?><br />
+        Force : <?= $perso->strength() ?>
       </p>
     </fieldset>
 
@@ -74,6 +75,7 @@ require 'combat.php';
               (dégâts : ', $unPerso->degats(),',
               niveau : ', $unPerso->niveau(),', 
               experience : ', $unPerso->experience(),'
+              force :', $unPerso->strength(),'
               )<br />';
           }
         }

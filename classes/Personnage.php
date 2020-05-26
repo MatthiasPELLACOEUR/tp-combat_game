@@ -5,7 +5,8 @@ class Personnage
           $id,
           $nom,
           $niveau,
-          $experience;
+          $experience,
+          $strength;
   
   const CEST_MOI = 1; // Constante renvoyée par la méthode `frapper` si on se frappe soi-même.
   const PERSONNAGE_TUE = 2; // Constante renvoyée par la méthode `frapper` si on a tué le personnage en le frappant.
@@ -23,13 +24,14 @@ class Personnage
     {
       return self::CEST_MOI;
     }
+    // $force = $this->strength();
     $this->experience +=25;
     // On indique au personnage qu'il doit recevoir des dégâts.
     // Puis on retourne la valeur renvoyée par la méthode : self::PERSONNAGE_TUE ou self::PERSONNAGE_FRAPPE
     return $perso->recevoirDegats();
   }
 
-    //  Hydratation
+  //  Hydratation
   public function hydrate(array $donnees)
   {
     foreach ($donnees as $key => $value)
@@ -57,6 +59,10 @@ class Personnage
     return self::PERSONNAGE_FRAPPE;
   }
   
+  public function nomValide()
+  {
+    return !empty($this->nom);
+  }
   
   // GETTERS //
   
@@ -85,6 +91,10 @@ class Personnage
     return $this->experience;
   }
   
+  public function strength()
+  {
+    return $this->strength;
+  }
     // SETTERS // 
     
   public function setDegats($degats)
@@ -125,8 +135,8 @@ class Personnage
     $this->experience = $experience;
   }
 
-  public function nomValide()
+  public function setStrength($strength)
   {
-    return !empty($this->nom);
+    $this->strength = $strength;
   }
 }

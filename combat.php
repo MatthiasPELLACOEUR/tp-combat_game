@@ -66,7 +66,7 @@ elseif (isset($_GET['frapper'])) {
           $message = 'Le personnage a bien été frappé !';
           
           $manager->update($perso);
-          $manager->update($persoAFrapper);
+          $manager->update($persoAFrapper, $perso->strength());
           
           break;
         

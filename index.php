@@ -53,11 +53,13 @@ require 'combat.php';
     <fieldset>
       <legend>Mes informations</legend>
       <p>
-        Nom : <?= htmlspecialchars($perso->nom()) ?><br />
+        Nom : <?= htmlspecialchars($perso->nom()) ?><br/>
+        Classe : <?= $perso->classe() ?>
+        <br>
         Dégâts : <?= $perso->degats() ?><br />
         Niveau : <?= $perso->niveau() ?><br />
         Experience :<?= $perso->experience() ?><br />
-        Force : <?= $perso->strength() ?>
+        Force : <?= $perso->strength() ?><br>
       </p>
     </fieldset>
 

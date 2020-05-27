@@ -153,13 +153,14 @@ class Magicien extends Personnage
   public function setClasse()
   {
     $this->classe = "Magicien";
+    return $this->classe;
   }
 
   public function recevoirDegats()
   {
       // Si l'adversaire est de la classe Voleur, les coups des Magiciens est multiplié par 2.
     if($this->classe = "Voleur"){
-      $this->degats *= 2;
+      return $this->degats *= 2;
     }
 
     // Si on a 100 de dégâts ou plus, on supprime le personnage de la BDD.
@@ -177,6 +178,7 @@ class Guerrier extends Personnage
   public function setClasse()
   {
     $this->classe = "Guerrier";
+    return $this->classe;
   }
 
   public function recevoirDegats()
@@ -201,6 +203,7 @@ class Voleur extends Personnage
   public function setClasse()
   {
     $this->classe = "Voleur";
+    return $this->classe;
   }
 
   public function recevoirDegats()

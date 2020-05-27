@@ -19,7 +19,7 @@ class PersonnagesManager
       'degats' => 0,
       'niveau' => 0,
       'experience' => 0,
-      'strength' => 0
+      'strength' => 0,
     ]);
   }
   
@@ -86,7 +86,7 @@ class PersonnagesManager
     if($perso->experience() >= 100){
       $perso->setexperience(0);
       $perso->setNiveau(1);
-      $perso->setStrength($perso->niveau);
+      $perso->setStrength($perso->niveau());
     }
     
     $q = $this->db->prepare('UPDATE personnages SET degats = :degats, niveau = :niveau, experience = :experience, strength = :strength WHERE id = :id');

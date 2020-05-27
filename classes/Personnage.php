@@ -1,5 +1,5 @@
 <?php
-class Personnage
+abstract class Personnage
 {
   private $degats,
           $id,
@@ -7,6 +7,8 @@ class Personnage
           $niveau,
           $experience,
           $strength;
+
+  protected $classe;
   
   const CEST_MOI = 1; // Constante renvoyée par la méthode `frapper` si on se frappe soi-même.
   const PERSONNAGE_TUE = 2; // Constante renvoyée par la méthode `frapper` si on a tué le personnage en le frappant.
@@ -95,6 +97,11 @@ class Personnage
   {
     return $this->strength;
   }
+
+  public function classe()
+  {
+    return $this->classe;
+  }
     // SETTERS // 
     
   public function setDegats($degats)
@@ -138,5 +145,77 @@ class Personnage
   public function setStrength($strength)
   {
     $this->strength = $strength;
+  }
+}
+
+class Magicien extends Personnage
+{
+  public function setClasse()
+  {
+    $this->classe = "Magicien";
+  }
+
+  public function recevoirDegats()
+  {
+      // Si l'adversaire est de la classe Voleur, les coups des Magiciens est multiplié par 2.
+    if($this->classe = "Voleur"){
+      $this->degats *= 2;
+    }
+
+    // Si on a 100 de dégâts ou plus, on supprime le personnage de la BDD.
+    if($this->degats >= 100){
+      return self::PERSONNAGE_TUE;
+    }
+
+    // Sinon, on se contente de mettre à jour les dégâts du personnage.
+    return self::PERSONNAGE_FRAPPE;
+  }
+}
+
+class Guerrier extends Personnage
+{
+  public function setClasse()
+  {
+    $this->classe = "Guerrier";
+  }
+
+  public function recevoirDegats()
+  {
+      // Si l'adversaire est de la classe Magicien, les coups des Guerriers est multiplié par 2.
+    if($this->classe = "Magicien"){
+      $this->degats *= 2;
+    }
+    
+      // Si on a 100 de dégâts ou plus, on supprime le personnage de la BDD.
+    if($this->degats >= 100){
+      return self::PERSONNAGE_TUE;
+    }
+
+    // Sinon, on se contente de mettre à jour les dégâts du personnage.
+    return self::PERSONNAGE_FRAPPE;
+  }
+}
+
+class Voleur extends Personnage
+{
+  public function setClasse()
+  {
+    $this->classe = "Voleur";
+  }
+
+  public function recevoirDegats()
+  {
+    // Si l'adversaire est de la classe Guerrier, les coups des Voleurs est multiplié par 2.
+    if($this->classe = "Guerrier"){
+      $this->degats *= 2;
+    }
+    
+      // Si on a 100 de dégâts ou plus, on supprime le personnage de la BDD.
+    if($this->degats >= 100){
+      return self::PERSONNAGE_TUE;
+    }
+
+    // Sinon, on se contente de mettre à jour les dégâts du personnage.
+    return self::PERSONNAGE_FRAPPE;
   }
 }

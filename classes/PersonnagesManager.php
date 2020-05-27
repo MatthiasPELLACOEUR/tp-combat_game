@@ -10,8 +10,9 @@ class PersonnagesManager
   
   public function add(Personnage $perso)
   {
-    $q = $this->db->prepare('INSERT INTO personnages(nom) VALUES(:nom)');
+    $q = $this->db->prepare('INSERT INTO personnages(nom, classe) VALUES(:nom, :classe)');
     $q->bindValue(':nom', $perso->nom());
+    $q->bindValue(':classe', $perso->classe());
     $q->execute();
     
     $perso->hydrate([
@@ -20,6 +21,7 @@ class PersonnagesManager
       'niveau' => 0,
       'experience' => 0,
       'strength' => 0,
+      'classe' => $_POST['classe'],
     ]);
   }
   
@@ -52,17 +54,24 @@ class PersonnagesManager
   {
     if (is_int($info))
     {
-      $q = $this->db->query('SELECT id, nom, degats, niveau, experience, strength FROM personnages WHERE id = '.$info);
-      $donnees = $q->fetch(PDO::FETCH_ASSOC);
-      
-      return new Personnage($donnees);
+      $q = $this->db->query('SELECT id, nom, degats, niveau, experience, strength, classe FROM personnages WHERE id = '.$info);
+      $perso = $q->fetch(PDO::FETCH_ASSOC);
     }
     else
     {
-      $q = $this->db->prepare('SELECT id, nom, degats, niveau, experience, strength FROM personnages WHERE nom = :nom');
+      $q = $this->db->prepare('SELECT id, nom, degats, niveau, experience, strength, classe FROM personnages WHERE nom = :nom');
       $q->execute([':nom' => $info]);
     
-      return new Personnage($q->fetch(PDO::FETCH_ASSOC));
+      $perso = $q->fetch(PDO::FETCH_ASSOC);
+
+    }
+
+    switch ($perso['classe'])
+    {
+      case 'guerrier': return new Guerrier($perso);
+      case 'magicien': return new Magicien($perso);
+      case 'voleur': return new Voleur($perso);
+      default: return null;
     }
   }
   
@@ -70,12 +79,18 @@ class PersonnagesManager
   {
     $persos = [];
     
-    $q = $this->db->prepare('SELECT id, nom, degats, niveau, experience, strength FROM personnages WHERE nom <> :nom ORDER BY nom');
+    $q = $this->db->prepare('SELECT id, nom, degats, niveau, experience, strength, classe FROM personnages WHERE nom <> :nom ORDER BY nom');
     $q->execute([':nom' => $nom]);
     
     while ($donnees = $q->fetch(PDO::FETCH_ASSOC))
     {
-      $persos[] = new Personnage($donnees);
+      switch ($donnees['classe'])
+      {
+        case 'guerrier': $persos[] = new Guerrier($donnees); break;
+        case 'magicien': $persos[] = new Magicien($donnees); break;
+        case 'voleur': $persos[] = new Voleur($donnees); break;
+      }
+      return $persos;
     }
     
     return $persos;
@@ -89,13 +104,14 @@ class PersonnagesManager
       $perso->setStrength($perso->niveau());
     }
     
-    $q = $this->db->prepare('UPDATE personnages SET degats = :degats, niveau = :niveau, experience = :experience, strength = :strength WHERE id = :id');
+    $q = $this->db->prepare('UPDATE personnages SET degats = :degats, niveau = :niveau, experience = :experience, strength = :strength, classe = :classe WHERE id = :id');
     
     $q->bindValue(':degats', $perso->degats()+$strength, PDO::PARAM_INT);
     $q->bindValue(':id', $perso->id(), PDO::PARAM_INT);
     $q->bindValue(':niveau', $perso->niveau(), PDO::PARAM_INT);
     $q->bindValue(':experience', $perso->experience(), PDO::PARAM_INT);
     $q->bindValue(':strength', $perso->strength(), PDO::PARAM_INT);
+    $q->bindValue(':classe', $perso->classe(), PDO::PARAM_INT);
 
     
     $q->execute();

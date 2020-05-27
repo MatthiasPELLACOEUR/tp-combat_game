@@ -89,7 +89,14 @@ require 'combat.php';
   ?>
     <form action="" method="post">
       <p>
-        Nom : <input type="text" name="nom" maxlength="50" />
+        Nom : <input type="text" name="nom" maxlength="50" /> <br>
+        <label for="classe">Choissisez un classe de personnage : </label>
+
+        <select name="classe">
+            <option value="magicien">Magicien</option>
+            <option value="guerrier" selected>Guerrier</option>
+            <option value="voleur">Voleur</option>
+        </select>
         <input type="submit" value="Créer ce personnage" name="creer" />
         <input type="submit" value="Utiliser ce personnage" name="utiliser" />
       </p>
